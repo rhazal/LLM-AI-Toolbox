@@ -292,6 +292,162 @@ By following these steps, I was able to integrate the Clerk authentication servi
 
 
 
+## 2.  Creating the SideBar and Dashboard
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+Working on the dashbord and creating a new sidebar (mobile and desktop versions)
+
+### Sidebar funcitonality 
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+created the sidebar and main page sections 
+
+created a `navbar` componenent 
+- with hamburger menue that will appear when sidebar dissapears (media queries)
+- added the `<userButton>` to the navbar instead
+
+creating a `sidebar` component 
+  - adding a logo 
+  - creating a name 
+  - using some creative styling using `cn` and `twMerge` library - ensuring proper way to add additonal dynamic classnames without risk of being overridden
+      ```tsx
+      import { Montserrat } from "next/font/google";
+
+      import { cn } from "@/lib/utils";
+
+      const montserrat = Montserrat({ weight: "600", subsets: ["latin"]});  
+      ```
+      ```tsx
+      <h1 className={cn("text-2xl font-bold", montserrat.className)}>Ai Toolbox</h1>
+      ```
+      - creating an array of the various routs that will be in the app, for example
+      ```tsx
+      const routes = [
+        {
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          href: '/dashboard',
+          color: "text-sky-500"
+      ```
+  - creating a map funciton to map over the route objects and passing the details into `<links>` and `<divs>`
+
+
+updating the `sidebar` and creating `MobileSidebar` component 
+  - extracting the `<Button>` & `<Menu>` into a new component:  `MobileSidebar`
+  - adding the sheet form shadcn - to slide the menue open
+    ```shell
+    npx shadcn-ui@latest add sheet
+    ```
+  -  wrapping the entire component inside this sheet tool and creating a trigger 
+  -  creating the sheet content and simply importing the sidebar component into the sheetcontent container 
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### Fixing hydration and specific highlighting heading/route
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>Running into hydration issues with the `MobileSidebar` component</strong> 
+
+used a little useEffect and useState trick to fix this
+```tsx
+const MobileSidebar = () => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+      setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+      return null;
+  }
+```
+<br><br>
+
+<strong>Highlighting effect</strong>
+
+Creating a highlight effect for the sidebar component so that when on a certain path the sidebar route will be highlighted
+  - used usePathname from the next/navigation library
+  ```tsx
+  import { usePathname } from "next/navigation";
+
+  const Sidebar = () => {
+  const pathname = usePathname();
+  return (
+    //rest of code
+    className={cn(
+        "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
+        pathname === route.href ? "text-white bg-white/10" : "text-zinc-400",
+    )}
+    //rest of code
+  )
+  ```
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+
+### Dashboard functionality
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+-  creating some headings and styling 
+-  creating a const of tools (eventually i will use some abstraction and put this elsewhere)
+```tsx
+const tools = [
+  {
+    label: "Converstations",
+    icon: MessageSquare,
+    color: "text-violet-500",
+    bgColor: "bg-ciolet-500/10",
+    href: "/conversation",
+  }
+]
+```
+-  importing the card component from shadcn
+    ```shell
+    npx shadcn-ui@latest add card
+    ```
+
+-  creating a map funciton to map over the tools (there will be more soon)
+   -  passing details into a Card component
+   -  creating some styling for the card and passing the elements into them
+   
+   -  creating an onclick function to take us to the correct page
+      -  using `useRouter` from 'next/navigation
+          ```tsx
+          <Card
+          onClick={() => router.push(tool.href)}
+          ```
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+
 ## x.  TEMPLATE HEADING
 <!-- SECTION container open -->
 <details>
@@ -332,3 +488,8 @@ TEXT TEXT
 <!--  SECTION container closed -->
 </details>
 <br/><br/>
+
+
+## temp
+
+### heading
