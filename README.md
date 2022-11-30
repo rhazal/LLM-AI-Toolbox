@@ -448,6 +448,183 @@ const tools = [
 </details>
 <br/><br/>
 
+## 3.  Conversation UI and Open AI API Integration
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+### Conversation UI
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+created a conversation route under the `(dashboard)/(routes)/conversation/page.tsx`<br><br>
+
+<strong>creating a `<Heading />` component and importing into the `conversation/page.tsx`</strong>
+- I defined the HeadingProps interface to specify the expected props for the Heading component, such as title, description, icon, iconColor, and bgColor.
+- I created the Heading component as a functional component, taking the HeadingProps as its props.
+- Inside the component, I structured the content by using the Icon prop and displaying it within a rounded container with the specified background color (bgColor) if provided.
+- I applied various styles to the component using Tailwind CSS classes to achieve the desired layout and visual presentation. The title was styled as a bold heading, while the description was styled as smaller text with a muted foreground color.
+- Lastly, I exported the Heading component at the end of the file, making it accessible for use in other parts of the project.
+
+<br><br>
+
+<strong>Fleshin out the `page.tsx` input section w/ forms</strong> 
+
+- Importing the form from shadcn
+  ```shell
+  npx shadcn-ui@latest add form
+  ```
+
+- Using the z library for handling schema validation with zod and the `zodResolver` from `@hookform/resolvers/zod` to integrate zod with `react-hook-form`
+
+- Creating a form schema in a new file `constants.ts`, where I will handle the form validation
+
+- Set up a form using `react-hook-form` and `zodResolver` to handle form validation based on the provided `formSchema`. The form also has a default value for the prompt field.
+
+- Defined a variable `isLoading` to track the form submission state, which will be used later to disable form inputs during the submission process.
+
+- Defined an `onSubmit` function to handle form submissions. However, the actual API call implementation is yet to be done. <br>Currently, the `onSubmit` function logs the form values to the console.
+
+- Rendering the Form component 
+  - Installing the Input component form shadcn
+    ```shell
+    npx shadcn-ui@latest add input
+    ```
+  - creating a div with all the form requirements (not going to list out the steps for this)
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+
+
+### Open AI API Integration
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>Set up</strong>
+- Creating an Open AI account [open AI](https://platform.openai.com/)
+- Getting the API secret key and adding to the .env file
+- Installing the Open Ai package into the project
+```shell
+npm i openai
+```
+<br><br>
+
+<strong>creating an api folder with:  (`app/api/conversation/route.ts`)</strong>
+-  I imported the required modules and libraries, including @clerk/nextjs, next/server, and openai.
+
+-  Setting up the OpenAI configuration with my API key was the next step. I created a new Configuration instance and initialized the OpenAIApi with this configuration.
+  ```ts
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const openai = new OpenAIApi(configuration);
+  ```
+
+-  I defined the POST function that would handle the API call. Inside this function, I retrieved the `userId` using `auth()` from `@clerk/nextjs`. I also parsed the incoming request body using `req.json()` to extract the messages field.
+
+- Created variouse checks with responses using NextResponse:
+  -  To ensure user authentication, I checked if `userId` was present. If not, I returned a 401 Unauthorized response using NextResponse.
+  -  To verify that the OpenAI API key was properly configured, I checked the `apiKey` field in the configuration. If it wasn't set, I returned a 500 Internal Server Error response.
+  -  I validated the presence of the messages field in the request body. If it was missing, I returned a 400 Bad Request response.
+
+-  Using the openai.createChatCompletion method, I made the API call to OpenAI. I specified the model as `"gpt-3.5-turbo"` and provided the messages.
+
+-  For further customization and handling of the response, I added a TODO comment in the code.
+
+-  I implemented error handling by using a try-catch block. In case of an error, I logged the error and returned a 500 Internal Server Error response.
+
+-  Lastly, I returned a success response with a 200 OK status.
+
+<br><br>
+
+<strong>Completing the response section in `conversation` ui</strong>
+
+preamble;
+   - installed and imported the packed axios for http requests
+   ```shell
+   npm i axios
+   ```
+   - brought the package `useRouter` into to the file to refresh the browser page (note, from next/navigation)
+   - Needed to implement `useState` for the setting of messages, with a specific type defined by openAI doc's and default being an empty array
+   ```ts
+   const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
+   ```
+
+<br><br>
+
+In the onsubmit button 
+  -  created a try, catch, finally block 
+     -  catch; and `console.log` any error's
+     -  finally;  `router.refresh();`
+     -  try; 
+     ```tsx
+      //define what the user message is    
+      const userMessage: ChatCompletionRequestMessage = { role: "user", content: values.prompt };
+      //an array of the user's message's 
+      const newMessages = [...messages, userMessage];
+      //api call
+      const response = await axios.post('/api/conversation', { messages: newMessages });            
+      //set the message 
+      setMessages((current) => [...current, userMessage, response.data]);
+      //reset the form back to default 
+      form.reset();
+      ```
+      <br><br>
+The Open AI Model is working ! 🥳🤖
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### Styling, adding loading states & empty states
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong> Styling, adding loading states & empty states </strong>
+
+- adding empty state, while rendering will check if there are no messages 
+  - created a new component `<empty />`
+
+- adding a simple loading state, while message is loading 
+  - created a new component `<loader />`
+
+- styling the messages;
+  - created conditional styling that will adjust depending on source of message (user or bot)
+  ```tsx
+  {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
+  ```
+  - with a bit of help from shadcn created two new components 
+    ```shell
+    npx shadcn-ui@latest add avatar
+    ```
+  - created a new component:  `<UserAvatar />` 
+  - created a new component:  `<BotAvatar />` 
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+
+
 ## x.  TEMPLATE HEADING
 <!-- SECTION container open -->
 <details>
@@ -489,7 +666,6 @@ TEXT TEXT
 </details>
 <br/><br/>
 
+## 
 
-## temp
-
-### heading
+### 
