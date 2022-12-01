@@ -625,6 +625,308 @@ The Open AI Model is working ! 🥳🤖
 <br/><br/>
 
 
+## 4.  Developing remaining AI Tools 
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+### Code Generation
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+Created a new route `app\(dashboard)\(routes)\code\page.tsx`
+
+<strong>Creating the UI and styling </strong>
+
+This was really simple to implement as it also uses the openAI model and just involved copy/pasting the conversation UI and tweaking few things;
+  - Image
+  - Main Heading
+  - Sub Heading text
+  - Basic colors
+  - Display message
+
+<br><br>
+
+<strong> Creating new API route</strong>
+
+creating a new `route.tsx` in the api folder under a new folder called code
+
+Also very simple to implement as it is very similar to the conversation generator, so essentially copy paste and tweak
+
+- first we want to give the ai some instructions;
+  ```ts
+  const instructionMessage: ChatCompletionRequestMessage = {
+    role: "system",
+    content: "You are a code generator. You must answer only in markdown code snippets. Use code comments for explanations."
+  };
+  ```
+
+- then when calling the api we want to feed this instruction first and then the message from the user;
+  ```tsx
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [instructionMessage, ...messages]
+  });
+  ```
+<br><br>
+
+<strong> Updating how we render the response from ai </strong>
+
+Currently it will out put the response in a text format and that is hard to read and practically useless, therefore need to update the way we present this response
+Need to create a way for the code to come out in a react markdown format.  Luckyly there is a package which can help alot with this
+
+```shell
+npm i react-markdown
+```
+Implementation: 
+
+  ```tsx
+  {/* RETRUN IN MARKUP FORMAT */}
+  <ReactMarkdown 
+    components={{
+      pre: ({ node, ...props }) => (
+          <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
+          <pre {...props} />
+          </div>
+      ),
+      code: ({ node, ...props }) => (
+          <code className="bg-black/10 rounded-lg p-1" {...props} />
+      )
+    }} 
+    className="text-sm overflow-hidden leading-7"
+  >
+    {message.content || ""}
+  </ReactMarkdown>
+  ```
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### Image Generation
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+started creating skeletons for the below and developed accordingly 
+
+#### Created the `constants.tsx`
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+1. I created a new TypeScript file named constants.ts inside the image folder of the routes directory under dashboard.
+
+2.  I imported the required modules by adding the following line at the beginning of the file:
+
+```ts
+import * as z from "zod";
+```
+
+3. I defined the form schema using Zod, which validated the form data for the image. It included the following fields:
+  - `prompt`: A required string field with a minimum length of 1 character, used for the photo prompt.
+  - `amount`: An optional string field with a minimum length of 1 character, used for the number of photos.
+  - `resolution`: An optional string field with a minimum length of 1 character, used for the resolution of the photos.
+```ts
+export const formSchema = z.object({
+  prompt: z.string().min(1, {
+    message: "Photo prompt is required",
+  }),
+  amount: z.string().min(1),
+  resolution: z.string().min(1),
+});
+```
+
+4. I defined the options for the amount field, which were displayed in a dropdown in the form. The options included the number of photos users could select, each represented as an object with value and label properties:
+```ts
+export const amountOptions = [
+  {
+    value: "1",
+    label: "1 Photo",
+  },
+  {
+    value: "2",
+    label: "2 Photos",
+  },
+  // etc.
+];
+```
+
+5.  I defined the options for the resolution field, which were displayed in another dropdown in the form. The options represented different image resolutions, each represented as an object with value and label properties:
+
+```ts
+export const resolutionOptions = [
+  {
+    value: "256x256",
+    label: "256x256",
+  },
+  {
+    value: "512x512",
+    label: "512x512",
+  },
+  // etc.
+];
+```
+
+</details>
+<br/><br/>
+
+#### Created `page.tsx`
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+1.  I imported the required modules and components
+
+2.  I defined the initial state using the `useState` hook to store the generated photos in the photos state variable.
+```tsx
+const [photos, setPhotos] = useState<string[]>([]);
+```
+
+3.  I set up the form using react-hook-form by creating a form instance with the useForm hook. The form had fields for prompt, amount, and resolution, and I used `zodResolver` to validate the form data against the `formSchema`:
+```ts
+const form = useForm<z.infer<typeof formSchema>>({
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    prompt: "",
+    amount: "1",
+    resolution: "512x512"
+  }
+});
+```
+
+4.  I defined the options for the amount and resolution fields, which were used in dropdowns in the form. The options were stored in the `amountOptions` and `resolutionOptions` arrays
+
+5.  I implemented the onSubmit function to handle form submission. It performed the following steps:
+    - Reset the photos state to an empty array.
+    - Extracted the form values from the form instance.
+    - Made an API call using axios.post to the /api/image endpoint with the form values.
+    - Retrieved the image URLs from the API response and stored them in the photos state.
+    - Reset the form to its default values.
+    <br><br>
+    - In case of an error during API call, logged the error to the console.
+    - I used the router from next/navigation to refresh the page after the form submission, ensuring that the generated images were displayed.
+
+6. Finally for the render,:
+   -  The input section, the same as the code/conversation generator with the exception of added form controls to handle the resolution and amount of images.
+   -  The output section displayed the loading spinner when isLoading was true, an empty state message when no images were generated, and the generated images using the Card and Image components from shadcn.
+
+</details>
+<br/><br/>
+
+#### Created the api call - `api/images/routes.tsx`
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+I created a new TypeScript file named route.ts inside the image folder of the api directory & imported the required modules and components.
+
+I initialized a new Configuration object with the apiKey provided in the environment variable process.env.OPENAI_API_KEY.
+
+I created an instance of OpenAIApi using the previously created configuration.
+
+I exported an asynchronous function named POST, which handles POST requests to the /api/image endpoint. Inside the POST function, I ;
+   - extracted the userId and the request body from the req object using destructuring.
+   - extracted the prompt, amount, and resolution from the request body using default values.
+   - checked for user authentication by verifying the existence of userId using auth() from @clerk/nextjs. If the user is not authenticated, I returned a NextResponse with the status code 401 (Unauthorized).
+   - ensured that the apiKey is configured. If it is not available, I returned a NextResponse with the status code 500 (Internal Server Error) and a message stating that the OpenAI API key is not configured.
+   - validated that the prompt, amount, and resolution fields are present in the request. If any of them are missing, I returned a NextResponse with the status code 400 (Bad Request) and an appropriate error message.
+    <br>
+   - Then called the openai.createImage() method with the provided prompt, amount, and resolution to generate the required images from the OpenAI API.
+   - Finally, I returned a JSON response with the data received from the OpenAI API.
+
+In case of an error during the process, I caught the error, logged it to the console with a specific tag, and returned a NextResponse with the status code 500 (Internal Server Error) and a generic "Internal Error" message.
+
+</details>
+<br/><br/>
+
+#### `Updated teh next.config.js` 
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+- simply just added the domain for the images received from openAI
+
+```js
+const nextConfig = {
+    images: {
+        domains: [
+            "oaidalleapiprodscus.blob.core.windows.net",
+        ]
+    }
+}
+```
+
+</details>
+<br/><br/>
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### Music & Video Generation (ReplicateAI)
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+#### Step 1: Setting up an Account with Replicate
+I went to the Replicate website and signed up for an account.
+
+#### Step 2: Getting the API Keys and Adding them to the .env File
+
+After logging in to the Replicate dashboard, I navigated to the API section to generate my API keys.
+
+I added the REPL_API_KEY and REPL_PROJECT_ID to the .env file:
+
+
+#### Step 3: Setting Up Spend Limits
+In the Replicate dashboard, I configured my spend limits to prevent unexpected usage costs.
+
+#### Step 4: Installing the Replicate Package into the Project
+Installing the replicate package into the project
+```shell
+npm i replicate
+```
+
+
+#### Step 5: Setting Up the Route Skeleton for Music/Video Route
+Inside the app/api directory, I created a new TypeScript file for the music and video route, such as video/route.ts and music/route.ts
+
+I set up the basic structure of the route file:
+
+
+#### Step 6: Setting Up the API Using Replicate Documentation
+
+I referred to the Replicate API documentation to understand the endpoints and payloads required for music or video generation.
+
+I implemented the necessary API call using the replicate package
+
+I customized the model and other options as per the Replicate API documentation for music or video generation.
+
+I handled the response and returned the generated music or video data as needed.
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+
+
 ## x.  TEMPLATE HEADING
 <!-- SECTION container open -->
 <details>
@@ -665,7 +967,7 @@ TEXT TEXT
 <!--  SECTION container closed -->
 </details>
 <br/><br/>
+ 
 
-## 
+##
 
-### 
