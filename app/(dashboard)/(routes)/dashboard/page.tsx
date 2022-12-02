@@ -15,59 +15,8 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-//🎯TODO
-//import { tools } from "@/constants";
-const tools = [
-  {
-    label: "Converstations",
-    icon: MessageSquare,
-    color: "text-violet-500",
-    bgColor: "bg-ciolet-500/10",
-    href: "/conversation",
-  },
-  {
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    color: "text-sky-500",
-    bgColor: "bg-sky-500/10",
-    href: '/dashboard',
-  },
-  {
-    label: 'Conversation',
-    icon: MessageSquare,
-    color: "text-violet-500",
-    bgColor: "bg-violet-500/10",
-    href: '/conversation',
-  },
-  {
-    label: 'Image Generation',
-    icon: ImageIcon,
-    color: "text-pink-700",
-    bgColor: "bg-pink-700/10",
-    href: '/image',
-  },
-  {
-    label: 'Video Generation',
-    icon: VideoIcon,
-    color: "text-orange-700",
-    bgColor: "bg-orange-700/10",
-    href: '/video',
-  },
-  {
-    label: 'Music Generation',
-    icon: Music,
-    color: "text-emerald-500",
-    bgColor: "bg-emerals-500/10",
-    href: '/music',
-  },
-  {
-    label: 'Code Generation',
-    icon: Code,
-    color: "text-green-700",
-    bgColor: "bg-green-700/10",
-    href: '/code',
-  },
-]
+import { tools } from "@/constants";
+
 
 
 export default function DashboardPage() {

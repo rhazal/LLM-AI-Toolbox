@@ -883,12 +883,17 @@ const nextConfig = {
 #### Step 1: Setting up an Account with Replicate
 I went to the Replicate website and signed up for an account.
 
+<br>
+
 #### Step 2: Getting the API Keys and Adding them to the .env File
 
 After logging in to the Replicate dashboard, I navigated to the API section to generate my API keys.
 
 I added the REPL_API_KEY and REPL_PROJECT_ID to the .env file:
 
+I customized the model and other options as per the Replicate API documentation for music or video generation.
+
+<br>
 
 #### Step 3: Setting Up Spend Limits
 In the Replicate dashboard, I configured my spend limits to prevent unexpected usage costs.
@@ -898,13 +903,14 @@ Installing the replicate package into the project
 ```shell
 npm i replicate
 ```
-
+<br>
 
 #### Step 5: Setting Up the Route Skeleton for Music/Video Route
 Inside the app/api directory, I created a new TypeScript file for the music and video route, such as video/route.ts and music/route.ts
 
 I set up the basic structure of the route file:
 
+<br>
 
 #### Step 6: Setting Up the API Using Replicate Documentation
 
@@ -925,6 +931,241 @@ I handled the response and returned the generated music or video data as needed.
 <!--  SECTION container closed -->
 </details>
 <br/><br/>
+
+
+## 5.  API Limiter - Functionality & UI
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+
+### Setting up Prisma and PlanetScale
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+<strong>Installing Prisma into the project</strong>
+
+Prisma unlocks a new level of developer experience when working with databases thanks to its intuitive data model, automated migrations, type-safety & auto-completion.
+
+```shell
+npm i -D prisma
+npx prisma init
+```
+
+<strong>Setting up an account with Planet Scale</strong>
+
+PlanetScale is the world’s most advanced serverless MySQL platform
+
+```shell
+npm i @prisma/client
+```
+
+  -  creating a database
+  -  configure to a prisma 
+  -  get the database url (into the .env file)
+  -  Update the scheme.prisma file 
+
+
+
+-  creating a new file prismadb.ts in the lib folder
+   -  preventing multiple prisma clients initialized in the dev environment 
+   -  creating a model for our user api limit in the shcema.prisma 
+    ```prisma
+    model UserApiLimit {
+      id        String      @id @default(cuid())
+      userId    String   @unique
+      count     Int      @default(0)
+      createdAt DateTime @default(now())
+      updatedAt DateTime @updatedAt
+    }
+    ```
+  -  pushing this to the db with
+  ```shell
+  npx prisma db push
+  ```
+  - adding the types into the project with
+  ```shell
+  npx prisma generate
+  ```
+   - Checking the data in the db with
+    ```shell
+    npx prisma studio
+    ```
+
+
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+
+
+### Protecting the maximum count in the project
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>Creating a `constants.ts` file</strong>
+
+   - setting the limit to 5 
+  ```ts
+  export const MAX_FREE_COUNTS = 5;
+  ```
+   - adding the regularly used tools and lucide-react icons into this file too 
+
+<br><br>
+
+<strong>Creating an `api-limit.ts` file in the `/libs folder`;</strong>
+
+1.  Imported Dependencies: I began by importing the necessary dependencies
+
+2.  Implemented incrementApiLimit Function: 
+    - I proceeded to define the incrementApiLimit function, which was responsible for increasing the API usage count for a specific user. 
+    - To ensure the user was signed in, I used auth() to check their authentication status. 
+    - Once confirmed, I retrieved the user's API usage count from the database using prismadb.userApiLimit.findUnique(). 
+    - If the user existed in the database, I incremented their count by 1 using prismadb.userApiLimit.update(). 
+    - For new users, I created a new entry with a count of 1 using prismadb.userApiLimit.create().
+
+3.  Implemented checkApiLimit Function: 
+    - Next, I defined the checkApiLimit function, which was responsible for checking if a user was within the free API usage limit. 
+    - Similar to the incrementApiLimit function, I first checked if the user was signed in using auth(). 
+    - Once confirmed, I retrieved the user's API usage count from the database using prismadb.userApiLimit.findUnique(). 
+    - If the user did not exist in the database or their count was less than MAX_FREE_COUNTS, which represented the maximum allowed free counts, I returned true, indicating that the user was within the free limit. 
+    - Otherwise, I returned false, indicating that the user had exceeded the free limit.
+
+
+<br>
+<br>
+
+<strong>Updating all the API calls to make use of api-limits</strong>
+
+Into all API Tools:  Conversation, Code , Video , Audio & Image api calls
+
+Imorting the functions from `api-limits.ts`;
+```tsx
+import { incrementApiLimit, checkApiLimit } from "@/lib/api-limit";
+```
+
+<br>
+
+Inside the POST(request):
+```tsx
+  //CHECK"S & INCREASING COUNT 
+  export async function POST(req:Request) {
+    try{
+
+      //previouse code 
+
+        const freeTrial = await checkApiLimit();
+        //const isPro = await checkSubscription();
+        if (!freeTrial) {
+            return new NextResponse("Free trial has expired. Please upgrade to pro.", { status: 403 });
+        }
+
+        //api call
+
+        //increaese the api limit 
+        await incrementApiLimit();
+
+      //remaining code
+```
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### Building the Front-end Interface for Api limit tracker 
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>Adding a new action to the `lib/api-limits.ts`</strong>
+
+1. *Imported Dependencies:* <br>I imported `auth` from `@clerk/nextjs` and `prismadb` from `@/lib/prismadb`.
+
+2. *Defined the Function:* <br>I created the `getApiLimitCount` function with the `async` keyword.
+
+3. *Retrieved User ID:*<br>Using `auth()`, I obtained the `userId` of the authenticated user.
+
+4. *Checked User Authentication:* <br>To ensure the user was authenticated, I checked for the presence of `userId`. If it wasn't available, I returned 0.
+
+5. *Fetched User API Limit:* <br> Using `prismadb.userApiLimit.findUnique()`, I retrieved the user's API limit based on their `userId`.
+
+6. *Handled User Not Found:* <br> In case the user was not found in the database, I returned 0.
+
+7. *Returned API Usage Count:* <br> Finally, if the user was found, I returned the `count` property from the `userApiLimit` object, representing the API usage count.
+
+<br>
+
+>Now have to run this action inside a server component so that I can pass it into the sidebar(which is a client side component)
+
+<strong>In the `app/(dashboard)/layouts.tsx` file;</strong>
+- getting the apiCount 
+```tsx
+const apiLimitCount = await getApiLimitCount();
+```
+- passing it into the `<SideBar />` component;
+```tsx
+<Sidebar apiLimitCount={apiLimitCount/>
+```
+<br><br>
+
+In the `components\sidebar.tsx` file;
+-  create an interface to accept the apiLimitCount as a prop
+-  inject the prop `apiLimiCount` along with the interface
+-  Creating a new component to display the count (called `<FreeCounter />`)
+
+<br><br>
+
+<strong>Creating a new component called `<FreeCounter />` - passing in `apiLimitCount` ;</strong>
+
+```shell
+npx shadcn-ui@latest add progress
+```
+
+1. *File Creation*: <br> I started by creating a new file named `free-counter.tsx` inside the `components` folder.
+
+2. *Import Dependencies*: <br> Next, I imported the necessary dependencies, including React hooks and various components from the project's UI library, as well as the constant `MAX_FREE_COUNTS` from the `constants` file.
+
+3. *Interface Definition*: <br> I defined an interface called `FreeCounterProps` to describe the props that the `FreeCounter` component would receive. Specifically, it had a `apiLimitCount` property of type number.
+
+4. *Functional Component*: <br> Using the `FreeCounterProps` interface, I created the functional component `FreeCounter`. Within this component, I destructured the `apiLimitCount` prop.
+
+5. *Hydration Trick*: <br> To prevent hydration issues, I used the `useState` and `useEffect` hooks. I created a state variable called `mounted` and set it to `true` after the component was mounted.
+
+6. *Conditional Rendering*: <br> I implemented a conditional rendering check using an `if` statement. It allowed me to render the component contents only when the `mounted` state was `true`. Otherwise, I returned `null`.
+
+7. *Rendering Component Contents*: <br> Inside the `return` statement, I structured the UI by rendering the `Card`, `CardContent`, `Button`, `Progress`, and `Zap` components, along with the necessary content.
+
+8. *Component Export*: <br> Finally, I exported the `FreeCounter` component to make it accessible for use in other parts of the application.
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+
 
 
 ## x.  TEMPLATE HEADING
