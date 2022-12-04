@@ -8,6 +8,9 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
+
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import Heading from "@/components/heading";
 import { Input } from "@/components/ui/input";
@@ -21,6 +24,7 @@ import { formSchema } from "./constants";
 
 const VideoPage = () => {
     const router = useRouter();
+    const proModal = useProModal();
     const [video, setVideo] = useState<string>();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -45,10 +49,13 @@ const VideoPage = () => {
             form.reset();
             
         } catch (error: any) {
-            //🎯 TODO:  add a 'Pro' subscription model -for prem users
-            console.log(error);
+          if (error?.response?.status === 403) {
+            proModal.onOpen();
+          } else {
+            toast.error("Something went wrong.");
+          }
         } finally {
-            router.refresh();
+          router.refresh();
         }
     }
 

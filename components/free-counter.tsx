@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
-// import { useProModal } from "@/hooks/use-pro-modal";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 
 interface FreeCounterProps {
@@ -17,7 +17,7 @@ interface FreeCounterProps {
 }
 
 export const FreeCounter = ({ apiLimitCount = 0,}:FreeCounterProps) => {
-  //const proModal = useProModal();
+  const proModal = useProModal();
   
   //trick to prevent hydration issues - prevent rendered on the server
   const [mounted, setMounted] = useState(false);
@@ -46,10 +46,14 @@ export const FreeCounter = ({ apiLimitCount = 0,}:FreeCounterProps) => {
               className="h-3" 
               value={(apiLimitCount / MAX_FREE_COUNTS) * 100} />
           </div>
-           <Button className="w-full" variant="premium">  {/*onClick={proModal.onOpen} variant="premium" */}
-            Upgrade
-            <Zap className="w-4 h-4 ml-2 fill-white" />
-          </Button>
+            <Button 
+             className="w-full" 
+             variant="premium"
+             onClick={proModal.onOpen}
+            >  
+              Upgrade
+              <Zap className="w-4 h-4 ml-2 fill-white" />
+            </Button>
         </CardContent>
       </Card>
     </div>

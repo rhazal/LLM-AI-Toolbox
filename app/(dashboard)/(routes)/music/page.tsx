@@ -7,8 +7,9 @@ import { Music } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ChatCompletionRequestMessage } from "openai";
 
+import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import Heading from "@/components/heading";
@@ -23,6 +24,7 @@ import { formSchema } from "./constants";
 
 const MusicPage = () => {
     const router = useRouter();
+    const proModal = useProModal();
     const [music, setMusic] = useState<string>();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -48,10 +50,13 @@ const MusicPage = () => {
             form.reset();
             
         } catch (error: any) {
-            //🎯 TODO:  add a 'Pro' subscription model -for prem users
-            console.log(error);
+          if (error?.response?.status === 403) {
+            proModal.onOpen();
+          } else {
+            toast.error("Something went wrong.");
+          }
         } finally {
-            router.refresh();
+          router.refresh();
         }
     }
 

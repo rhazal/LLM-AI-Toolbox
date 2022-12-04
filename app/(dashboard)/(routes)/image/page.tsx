@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,6 +28,7 @@ import { Card, CardFooter } from "@/components/ui/card";
 
 const ImagePage = () => {
     const router = useRouter();
+    const proModal = useProModal();
     const [photos, setPhotos] = useState<string[]>([]);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -59,10 +62,13 @@ const ImagePage = () => {
             form.reset();
             
         } catch (error: any) {
-            //🎯 TODO:  add a 'Pro' subscription model -for prem users
-            console.log(error);
+          if (error?.response?.status === 403) {
+            proModal.onOpen();
+          } else {
+            toast.error("Something went wrong.");
+          }
         } finally {
-            router.refresh();
+          router.refresh();
         }
     }
 

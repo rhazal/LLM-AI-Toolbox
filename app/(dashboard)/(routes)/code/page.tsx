@@ -11,6 +11,8 @@ import { ChatCompletionRequestMessage } from "openai";
 import { cn } from "@/lib/utils";
 import ReactMarkdown  from "react-markdown";
 
+import { useProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import Heading from "@/components/heading";
@@ -27,6 +29,8 @@ import { formSchema } from "./constants";
 
 const CodePage = () => {
     const router = useRouter();
+    const proModal = useProModal();
+
 
     const [messages, setMessages] = useState<ChatCompletionRequestMessage[]>([]);
 
@@ -58,11 +62,14 @@ const CodePage = () => {
             form.reset();
             
         } catch (error: any) {
-            //🎯 TODO:  add a 'Pro' subscription model -for prem users
-            console.log(error);
-        } finally {
+            if (error?.response?.status === 403) {
+              proModal.onOpen();
+            } else {
+              toast.error("Something went wrong.");
+            }
+          } finally {
             router.refresh();
-        }
+          }
     }
 
     return ( 

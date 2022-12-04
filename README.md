@@ -1168,6 +1168,187 @@ npx shadcn-ui@latest add progress
 
 
 
+## 6.  Premium/Pro Modal UI 
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+### <strong>Creating new hook:  `use-pro-modal.ts`; </strong>
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>Give us global state controls to open and close the modal;
+>Requires a state management tool, I have chosen to use zustand again:
+>As this app doesnt have massive requirements for state control.
+>created a `zustand` store to manage the modal state, allowing other components to easily interact with the modal and control its visibility.
+
+```shell
+npm i zustand 
+```
+
+1. *Zustand Store*: <br> I used the `zustand` library to create a store called `useProModalStore`. This store manages the state for the `ProModal` component, including whether it is open or closed.
+
+2. *Interface Definition*: <br> I defined an interface called `useProModalStore`, which describes the shape of the state managed by the store. It consists of two properties: `isOpen` (a boolean indicating whether the modal is open) and two functions `onOpen` and `onClose` (to open and close the modal, respectively).
+
+3. *Store Creation*: <br> I used the `create` function from `zustand` to initialize the store. The `create` function takes a function as its argument, which receives a `set` function as its parameter.
+
+4. *State Management*: <br> Inside the `create` function, I used the `set` function to manage the state of the store. The initial state is defined with `isOpen` set to `false`.
+
+5. *Event Handlers*: <br> I defined two event handler functions, `onOpen` and `onClose`, which use the `set` function to update the `isOpen` state. When `onOpen` is called, it sets `isOpen` to `true`, and when `onClose` is called, it sets `isOpen` to `false`.
+
+6. *Store Export*: <br> Finally, I exported the `useProModal` store, making it available for use in other parts of the application. Components can access the state and functions provided by this store to manage the visibility of the modal.
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### <strong>Creating a provider for the modal in components folder: `modal-provider.tsx` ;</strong>
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>created a `ModalProvider` component that takes care of rendering the `ProModal` component once it is mounted. This ensures that the modal is only shown when the component is ready and avoids potential issues with rendering in SSR (Server-Side Rendering) environments.
+
+1. *Modal Provider*: <br> I created a `ModalProvider` component responsible for rendering the `ProModal` component, which is used to display a modal in the application.
+
+2. *"use client"*: <br> The component starts with the `"use client"` import, indicating that it is used in the client-side of the application.
+
+3. *State Management*: <br> Inside the `ModalProvider`, I used the `useState` hook to manage the state of `isMounted`.<br> This state determines whether the component is mounted or not.
+
+4. *Mounting Detection*: <br> I used the `useEffect` hook with an empty dependency array to detect when the component is mounted.<br> When the component mounts, the `isMounted` state is set to `true`.
+
+5. *Conditional Rendering*: <br> Before rendering the `ProModal` component, there's a conditional check to ensure the component is mounted (`isMounted === true`). <br>If it is not mounted, `null` is returned, effectively preventing rendering until the component is mounted.
+
+6. *ProModal Component*: <br> After the conditional check, the `ProModal` component is rendered. The `ProModal` component likely handles displaying the modal content and its functionality.
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### <strong>Creating the: `pro-modal.tsx` ;</strong>
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>created a `ProModal` component that provides users with the option to upgrade to a premium subscription. The modal displays the available premium tools and allows users to initiate the subscription process by clicking the "Upgrade" button.
+
+1. *ProModal Component*: <br> I created a `ProModal` component that is used to display a subscription upgrade dialog to users.
+
+2. *"use client"*: <br> The component starts with the `"use client"` import, indicating that it is used in the client-side of the application.
+
+3. *State Management*: <br> Inside the `ProModal`, I used the `useState` hook to manage the state of `loading` <br> indicates whether the subscription button is in a loading state or not.
+
+4. *Subscription Function*: <br> I defined the `onSubscribe` function, which is called when the user clicks the "Upgrade" button.<br> This function sends a request to the `/api/stripe` endpoint to initiate the subscription process using Axios.<br> If successful, the user is redirected to the returned URL.
+
+5. *Dialog Component*: <br> The `ProModal` component utilizes the `Dialog` component from the `@/components/ui/dialog` module.<br> The dialog displays the subscription details to the user.
+
+6. *Dialog Header*: <br> The dialog header contains the title "Upgrade to Genius" with a "pro" badge indicating the premium subscription.
+
+7. *Dialog Description*: <br> The dialog description section displays a list of available tools with corresponding icons and a checkmark indicating they are part of the premium package. <br> The list of tools is dynamically generated from the `tools` constant.
+
+8. *Dialog Footer*: <br> The dialog footer contains the "Upgrade" button, which calls the `onSubscribe` function when clicked. The button is also disabled when the `loading` state is `true`.
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### <strong>Implementing the pro-modal around the app</strong>
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+-  Firstly, updated and imported the `<ModalProvider />` into the root `layout.tsx` 
+
+-  Added an onClick funciton to the `SideBar` -> `FreeCounter` -> Button, that will open the Modal
+
+-  Every time we hit a 403 error (limit reached on API calls)
+I very cleverly put an if statement into all the api calls that will give a status of error 403
+```tsx
+if (!freeTrial) {
+        return new NextResponse("Free trial has expired. Please upgrade to pro.", { status: 403 });
+    }
+```
+
+- Now just have to update the variouse routs catch blocks to open the modal if encountering status: 403 in all the AI TOOLS.
+
+  Specifically at the `app\(dashboard)\(routes)\(EACH API TOOL)\page.tsx`;
+
+  ```tsx
+  //adding the imports
+  import { useProModal } from "@/hooks/use-pro-modal";
+  import toast from "react-hot-toast";
+
+  //calling the useProModal inside the functional component
+  const proModal = useProModal();
+  
+  //then in the onSubmit button - catch block 
+  catch (error: any) {
+      if (error?.response?.status === 403) {
+        proModal.onOpen();
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+      router.refresh();
+    }
+  ```
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### <strong>Catching a bug:  Forgot to pass api-counter into mobilesidebar </strong>
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+> This looks like prop drilling an to an extent it is, however take into cosideration the effort to create a state management tool for this project.  As well as having to navigate server/client side components.
+
+Inside the `navbar` component:
+  passing in the api counter into the navbar
+  ```tsx
+  const apiLimitCount = await getApiLimitCount();
+
+  //...
+  <MobileSidebar apiLimitCount={apiLimitCount} />
+  ```
+
+Inside the `mobile-sidebar.tsx` component:
+   - creating an interface to receive the apiLimitCounter
+   - receiving the api-counter as props
+   - pass into the Sidebar component (already set up to receive the props - inface required)
+  ```tsx
+  <Sidebar apiLimitCount={apiLimitCount} />
+  ``` 
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+ 
+
 ## x.  TEMPLATE HEADING
 <!-- SECTION container open -->
 <details>
@@ -1189,6 +1370,44 @@ TEXT TEXT
 <br/><br/>
 
 
+### SMALL HEADING
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+TEXT TEXT
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+
+
+## x.  TEMPLATE HEADING
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+### Small Heading
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+TEXT TEXT
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
 
 
 ### SMALL HEADING
@@ -1211,4 +1430,6 @@ TEXT TEXT
  
 
 ##
+
+
 
