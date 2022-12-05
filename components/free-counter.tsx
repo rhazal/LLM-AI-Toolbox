@@ -12,11 +12,11 @@ import { useProModal } from "@/hooks/use-pro-modal";
 
 
 interface FreeCounterProps {
-    // isPro: ,
+    isPro: boolean,
     apiLimitCount: number,
 }
 
-export const FreeCounter = ({ apiLimitCount = 0,}:FreeCounterProps) => {
+export const FreeCounter = ({ apiLimitCount = 0, isPro = false}:FreeCounterProps) => {
   const proModal = useProModal();
   
   //trick to prevent hydration issues - prevent rendered on the server
@@ -30,9 +30,9 @@ export const FreeCounter = ({ apiLimitCount = 0,}:FreeCounterProps) => {
   }
   
 
-//   if (isPro) {
-//     return null;
-//   }
+  if (isPro) {
+    return null;
+  }
 
   return (
     <div className="px-3">

@@ -19,16 +19,22 @@ import { useProModal } from "@/hooks/use-pro-modal";
 import { tools } from "@/constants";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { log } from "console";
 
 export const ProModal = () => {
   const proModal = useProModal();
   const [loading, setLoading] = useState(false);
 
+  //making stripe api call 
   const onSubscribe = async () => {
     try {
       setLoading(true);
+
+      console.log('🔥');
+      
       const response = await axios.get("/api/stripe");
 
+      //redirect the user to the `url` received from the API response
       window.location.href = response.data.url;
     } catch (error) {
       toast.error("Something went wrong");

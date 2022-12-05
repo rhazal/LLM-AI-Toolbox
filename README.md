@@ -1349,35 +1349,544 @@ Inside the `mobile-sidebar.tsx` component:
 <br/><br/>
  
 
-## x.  TEMPLATE HEADING
+## 7.  Stripe Integration
 <!-- SECTION container open -->
 <details>
 <summary> Click here to expand: </summary>
 <br>
 
 
-### Small Heading
+### Setting up Stripe
 <hr>
 <!-- heading container open -->
 <details>
 <summary> Click here to expand: </summary>
 <br>
 
-TEXT TEXT
+
+
+<strong>Account setup; </strong>
+
+- signed in to my dashboard
+
+- Created a new store and located my publishable and secret key, injected into the .env
+
+- Importing the stripe package into the project
+  ```shell
+  npm i stripe
+  ```
+
+<br><br>
+
+<strong> Instantiating stripe in `lib/stripe.ts`</strong>
+
+>responsible for setting up the necessary infrastructure to integrate Stripe: - creates a new instance of the Stripe class, - passing the Stripe secret key from the environment variables - and additional configuration options.
+
+```ts
+import Stripe from "stripe"
+
+export const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
+  apiVersion: "2022-11-15",
+  typescript: true,
+});
+
+```
+
+<br><br>
+
+<strong> creating a `userSubscription` modal in prisma:</strong>
+
+Before we get going, I created a `userSubscription` modal in the `schema.prisma`
+
+Responsible for storing all the customers data required to work with stripe 
+
+
+```prisma
+model UserSubscription {
+  id        String      @id @default(cuid())
+  userId    String   @unique
+  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
+  stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
+  stripePriceId          String?   @map(name: "stripe_price_id")
+  stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
+}
+```
+
+Followed by:
+-  Adding the types to our project
+    ```shell
+    npx prisma generate
+    ```
+
+- Pushing modal to the prisma db
+  ```shell
+  npx prisma db push
+  ```
+
+- Check everything worked in the studio 
+  ```shell
+  npx prisma stuido
+  ```
 
 <!--  heading container closed -->
 </details>
 <br/><br/>
 
 
-### SMALL HEADING
+### Setting up route for stripe - <em>backend API endpoint</em>
 <hr>
 <!-- heading container open -->
 <details>
 <summary> Click here to expand: </summary>
 <br>
 
-TEXT TEXT
+In the `app\api\stripe\route.ts`
+
+>the `GET` function serves as a backend API endpoint for handling user subscriptions. It checks if the user already has a Stripe subscription and creates the appropriate session for the user, allowing them to manage or initiate a subscription for the "AI Toolbox Pro" with unlimited AI generations.
+
+
+1. *GET Function*: <br>defined a `GET` function that handles the server-side logic for creating and managing Stripe subscriptions.
+
+2. *Auth and User*: <br> The function imports `auth` and `currentUser` from `@clerk/nextjs` to authenticate the user making the request and fetch the current user data.
+
+3. *Authorization Check*: <br> The function checks if there is a valid `userId` and a corresponding `user`. If not, it returns a "Unauthorized" response with a status code of 401.
+
+4. *Stripe Subscription Check*: <br> The function then queries the `prismadb` to find a subscription associated with the current `userId`.
+
+5. *Billing Portal or Checkout Session*: <br> <strong>If a Stripe subscription exists</strong> (`userSubscription.stripeCustomerId` is present)<br>- the function creates a billing portal session using Stripe's `billingPortal.sessions.create`. <br>This allows the user to manage their subscription and cancel if needed. The URL for the billing portal session is returned in the response.<br>
+<br>
+<strong>If there is no existing Stripe subscription</strong><br> - the function creates a new checkout session using Stripe's `checkout.sessions.create`. <br>This creates a new subscription for the user with a price of $20 (in USD) per month for "AI Toolbox Pro" with unlimited AI generations. <br>The URL for the checkout session is returned in the response.
+
+1. *Metadata*: <br> Both the billing portal session and checkout session include the `userId` as metadata, which can be useful for tracking the user's subscription status. <br> This is also important to for post checkout-session if the user completes the transaction.
+
+2. *Error Handling*: <br> The function includes error handling and logs any Stripe-related errors to the console.
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### Setting up server-side webhook handler for Stripe events
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+#### `HELP GETTING STRIPE-WEBHOOK SETUP + RUNNING FOR DEV-ENV:`
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+ [usefule video](https://www.youtube.com/watch?v=jJu8vQH7hLY&ab_channel=Code180)
+
+
+1.  Dashboard>Webhooks>Test in Local env<br><br>
+2.  Download the Stripe CLI, navigate too (via terminal) <br><br>
+3.  Run the stripe.exe. :  
+    ```powershell
+    .\stripe.exe
+    ```
+4.  Login to the cli:  ./stripe login
+       - (should return your pairing code & a link - follow the link )
+       - (allow access in browser - terminal should update with Done!)<br><br>
+5. You should see login seciton turn green at step 1<br><br>
+6. Then forward events to the webhook
+    ```powershell
+    ./stripe listen --forward-to localhost:3000/api/webhook
+    ```
+
+    <em>note to update accordingly, this is where my webhook is located</em>
+7. You should get:
+    - Ready! + you webhook signing secret 
+  <br><br>
+1.  Copy the webhook into your .env file - STRIPE_WEBHOOK_SECRET
+   
+2. Keep the terminal open while developing 
+
+</details>
+<hr>
+<br/><br/>
+
+>This `POST` function allows your server to handle incoming Stripe webhook events and update the `prismadb.userSubscription` table accordingly. It ensures that your application remains synchronized with Stripe's billing and subscription events.
+
+1. *POST Function*: <br> This function is a server-side webhook handler for processing incoming Stripe events.
+
+2. *Request Body and Signature*: <br> The function receives a `POST` request with the Stripe webhook payload in the request body. <br> It also retrieves the Stripe signature from the request headers.
+
+3. *Verify Event*: <br> The function verifies the authenticity of the Stripe webhook event using the Stripe SDK's `webhooks.constructEvent` method. <br> If the verification fails, it returns a response with a status code of 400, indicating a webhook error.
+
+4. *Event Handling*: <br> The function then processes different types of Stripe events based on the event type.
+
+5. *checkout.session.completed Event*: <br> If the event type is "checkout.session.completed", the function retrieves the subscription details from the Stripe event, including the `userId` from the session's metadata.<br> It then creates a new record in the `prismadb.userSubscription` table to store the user's subscription information, including the `userId`, `stripeSubscriptionId`, `stripeCustomerId`, `stripePriceId`, and `stripeCurrentPeriodEnd`.
+
+6. *invoice.payment_succeeded Event*: <br> If the event type is "invoice.payment_succeeded", the function retrieves the subscription details and updates the corresponding record in the `prismadb.userSubscription` table with the latest `stripePriceId` and `stripeCurrentPeriodEnd`.
+
+7. *Successful Response*: <br> The function returns a response with a status code of 200, indicating that the webhook event has been successfully processed.
+
+8. *Error Handling*: <br> If there is an error in processing the webhook events or database operations, the function returns an appropriate response with an error message.
+
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### Implementing te stripe checkout around the app
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>The `onSubscribe` function (upgrade button) in `components\pro-modal.tsx` </strong>
+
+>The `onSubscribe` function is essential for initiating the subscription process with Stripe and handling potential errors during the process. This function is responsible for handling the subscription process when the user clicks on the "Upgrade" button.
+
+
+1. *Asynchronous Operation*: <br>The function is defined as an asynchronous function with the `async` keyword, allowing it to use `await` to wait for the API response.
+
+2. *State Management*: <br>The function uses the `setLoading` function to set the `loading` state to `true` before making the API call. This is likely used to show a loading spinner or disable the "Upgrade" button during the API call.
+
+3. *Stripe API Call*: <br>The function uses `axios.get` to make a `GET` request to the `/api/stripe` endpoint. This endpoint is responsible for handling the subscription process on the server-side.
+
+4. *Response Handling*: <br>If the API call is successful, it retrieves the response data containing the `url` property, which represents the URL to redirect the user for subscription completion.
+
+5. *Redirection*: <br>The function uses `window.location.href` to redirect the user to the `url` received from the API response. This takes the user to the Stripe checkout page for subscription.
+
+6. *Error Handling*: <br>If an error occurs during the API call, the function catches the error in the `catch` block and displays a toast message with the error message "Something went wrong."
+
+7. *Finally Block*: <br>The `finally` block is used to set the `loading` state back to `false`, ensuring that the loading state is updated correctly, regardless of whether the API call succeeds or fails.
+
+
+
+```tsx
+//making stripe api call 
+const onSubscribe = async () => {
+  try {
+    setLoading(true);
+    
+    const response = await axios.get("/api/stripe");
+
+    window.location.href = response.data.url;
+  } catch (error) {
+    toast.error("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+}
+```
+
+>Note to self:  had an error with the db - somehow the npx prisma db push only half worked (literally)
+>Had to reset and push again
+>I think I may have been starting to run the dev server at the same time and it got cut off halfway
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+
+
+### Bug Fix:  Authentication issue - Middleware.tsx
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>The error: </strong>  
+in the development console:
+
+>INFO: Clerk: The request to /api/webhook is being redirected because there is no signed-in user, and the path is not included in `ignoredRoutes` or >`publicRoutes`. To prevent this behavior, choose one of:
+>
+>1. To make the route accessible to both signed in and signed out users, add "/api/webhook" to the `publicRoutes` array passed to authMiddleware
+>2. To prevent Clerk authentication from running at all, pass `ignoredRoutes: ["/((?!api|trpc))(_next|.+\..+)(.*)", "/api/webhook"]` to authMiddleware
+>3. Pass a custom `afterAuth` to authMiddleware, and replace Clerk's default behavior of 
+>redirecting unless a route is included in publicRoutes
+>
+>For additional information about middleware, please visit https://clerk.com/docs/nextjs/
+>This log only appears in development mode, or if `debug: true` is passed to authMiddleware)
+
+<br><br>
+
+<strong>The reason for this: </strong>
+
+It's trying to go to our webhook correctly however it's telling us we are not authenticated and giving us a 401 error.
+Which generally means, (Unauthorized) status code indicates that the request has not been applied because it lacks valid authentication credentials for the target resource.
+
+The developer console gave some really good advice and reminded me why I am getting this error, I forgot to add the webhook route into the publicRoute.
+
+<br><br>
+
+<strong>The solution:  </strong>
+
+Just as the developer console said:
+>To make the route accessible to both signed in and signed out users, add "/api/webhook" to the `publicRoutes` array passed to authMiddleware
+
+So, in the `middleware.ts`:
+
+- simply need to add our webhook to our public routes.
+
+```ts
+export default authMiddleware({
+  publicRoutes: ["/", "/api/webhook"]
+});
+```
+
+>Testing things again and it seems to be working.
+>Got a 404 error only because I have set the return url to take the user to the xxx/settings page and I have not yet createed that
+>However, dev console gave no errors and checking the prisma db and the user has been created.  Success!!!
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### Creating a little helper function/util - check status of subscription
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+Creating a `lib/subscriptions.ts`
+
+>The `checkSubscription` function is useful for verifying whether the current user has a valid subscription, which can be used for access control or displaying subscription-related content or features within the application.
+
+1. *checkSubscription Function*: <br> This function is responsible for checking the subscription status of the current user.
+
+2. *Asynchronous Operation*: <br> The function is defined as an asynchronous function with the `async` keyword, allowing it to use `await` for database queries.
+
+3. *User Authentication*: <br> The function uses the `auth` function from `@clerk/nextjs` to obtain the authenticated user's information, including the `userId`.
+
+4. *Check for User Authentication*: <br> If the `userId` is not available (user is not authenticated), the function returns `false`, indicating that the user does not have an active subscription.
+
+5. *Database Query*: <br> The function uses `prismadb.userSubscription.findUnique` to query the database and retrieve the user's subscription details.
+
+6. *Check for User Subscription*: <br> If the `userSubscription` is not available (no subscription entry found for the user), the function returns `false`, indicating that the user does not have an active subscription.
+
+7. *Subscription Validity Check*: <br> The function checks whether the `stripeCurrentPeriodEnd` date (end of the current subscription period) plus one day (`DAY_IN_MS`) is greater than the current date (`Date.now()`). This check ensures that the subscription is still valid and has not expired.
+
+8. *Return Value*: <br> The function returns `true` if the user has an active and valid subscription. Otherwise, it returns `false`.
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### Creating route/page for settings
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>Creating the new route `app\(dashboard)\(routes)\settings\page.tsx`;</strong>
+
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>The `SettingsPage` component provides users with information about their subscription plan and allows them to manage their account settings. Depending on their subscription status, they can access different features or take actions such as upgrading to a Pro plan or managing their current subscription.
+
+1. *SettingsPage Component*: <br> This component represents the settings page of the application.
+
+2. *Asynchronous Operation*: <br> The component uses the `async` keyword to make an asynchronous call to `checkSubscription`.
+
+3. *Importing Dependencies*: <br> The component imports necessary dependencies, including the Lucide React icon component (`Settings`), the custom `Heading` component, `SubscriptionButton` component, and the `checkSubscription` function from `@/lib/subscription`.
+
+4. *Subscription Status Check*: <br> The component calls the `checkSubscription` function to determine if the current user has a valid subscription. <br> The `await` keyword is used to wait for the asynchronous operation to complete.
+
+5. *Render Content*: <br> The component renders the settings page content inside a `div` element.
+
+6. *Heading Component*: <br> The component uses the custom `Heading` component to display the page title, description, and an icon (the Settings icon from Lucide React).
+
+7. *Subscription Status Display*: <br> The component displays a message indicating whether the user is on a Pro plan or a free plan, based on the value of the `isPro` variable.
+
+8. *SubscriptionButton Component*: <br> The component renders the `SubscriptionButton` component, passing the `isPro` value as a prop. <br>The `SubscriptionButton` component is responsible for rendering the appropriate button based on the user's subscription status.
+
+</details>
+<br/><br/>
+
+
+
+<strong>creating the new component `components\subscription-button.tsx`;</strong>
+
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>The `SubscriptionButton` component is used in the `SettingsPage` component (as seen in the previous code snippet) to allow users to manage their subscription or upgrade to a Pro plan, depending on their current subscription status.
+
+1. *SubscriptionButton Component*: <br> This component represents a button that allows the user to manage their subscription or upgrade to a Pro plan based on their subscription status.
+
+2. *Importing Dependencies*: <br> The component imports necessary dependencies, including `axios` for making API calls, `useState` to manage component state, `Zap` icon from Lucide React, and `toast` from react-hot-toast for displaying error messages.
+
+3. *State Management*: <br> The component uses the `useState` hook to manage the loading state of the button.
+
+4. *onClick Function*: <br> The component defines an `onClick` function to handle the button click event. <br>When the button is clicked, this function makes an API call using `axios` to `/api/stripe` to get the URL for subscription management or upgrade. <br>The user is then redirected to the returned URL using `window.location.href`.
+
+5. *Button Rendering*: <br> The component renders a `<Button>` component with the appropriate variant (either "default" or "premium") based on the `isPro` prop.<br> If `isPro` is true, the button text will be "Manage Subscription," and if it's false, the text will be "Upgrade." <br>Additionally, if `isPro` is false, a `<Zap>` icon will be displayed next to the button text.
+
+6. *Loading State and Disabled Prop*: <br> The button is disabled and shows a loading state while the API call is in progress (controlled by the `loading` state).
+
+</details>
+<br/><br/>
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### BUG FIX:  Enabling the customer Portal for Test mode
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+<strong>The error: </strong>  
+in the development console:
+
+>[STRIPE_ERROR] StripeInvalidRequestError: You can’t create a portal session in test mode until you save your customer portal settings in test mode at https://dashboard.stripe.com/test/settings/billing/portal.
+>    at StripeError.generate (webpack-internal:///(sc_server)/./node_modules/stripe/esm/Error.js:22:20)
+>    at res.toJSON.then._Error_js__WEBPACK_IMPORTED_MODULE_0__.StripeAPIError.message (webpack-internal:///(sc_server)/./node_modules/stripe/esm/RequestSender.js:102:82)        
+>    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {     
+>  type: 'StripeInvalidRequestError',
+>  raw: {
+>    message: 'You can’t create a portal session in test mode until you save your customer portal settings in test mode at https://dashboard.stripe.com/test/settings/billing/portal.',
+>    request_log_url: 'https://dashboard.stripe.com/test/logs/req_4MCyG4JckpYwPs?t=1689939254',
+
+<br><br>
+
+<strong>The reason for this: </strong>
+
+Stripe doesn't know if you have given the permissions for testing this in the development mode.
+This helps prevent accidently arraiving on this page.
+
+Therefore need to check the settings and enable it first.
+
+<br><br>
+
+<strong>The solution:  </strong>
+
+You can follow the link given in the error message:  https://dashboard.stripe.com/test/settings/billing/portal
+Alternativly, you can go Dashboard and search settings>billing>customer portal
+
+Then activate the test link button - refresh the app and try again 
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### Updating the app for premium users
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+#### <strong> Updating the upgrade button / generation count <strong>
+<!--small container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+In the `components\free-counter.tsx`
+
+- updating interface with an isPro
+- passing as props into the app, false by default 
+- create an if staement that returns null
+  ```tsx
+  if (isPro) {
+    return null;
+  }
+  ```
+ 
+ <br><br>
+
+ In the `components\sidebar.tsx`
+
+- updating interface with an isPro
+- passing as props into the app, false by default
+- passing the isPro into the free-counter component
+  ```tsx
+  <FreeCounter
+    isPro={isPro}
+    apiLimitCount={apiLimitCount} 
+  />
+  ```
+
+<br><br>
+
+In the `app\(dashboard)\layout.tsx`
+
+- calling the `checkSubscription()` 
+    ```tsx
+    const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
+      const isPro = await checkSubscription();
+    ```
+- passing into the `<Sidebar isPro={isPro} ... />`
+
+<br><br>
+
+Doin the exact same pattern as above with both the:
+- `components\mobile-sidebar.tsx`
+- `components\navbar.tsx`
+
+
+
+<!-- small container closed -->
+</details>
+<br/><br/>
+
+
+#### <strong> Updating the AI Tools API calls to allow more if user is premium <strong>
+<!--small container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+For all the AI TOOLS API call will need to update the code with the following
+
+>  ✅ Conversation <br>
+>  ✅ Code Generaton <br>
+>  ✅ Audio Generation <br>
+>  ✅ Video Generation <br>
+>  ✅ Music Gerneration <br>
+
+
+- add the `checkSubscription` function into the file;
+  ```tsx
+  import { checkSubscription } from "@/lib/subscription";
+  ```
+
+- in the checks, check if user is subscribed/premium user;
+  ```tsx
+  const isPro = await checkSubscription();
+  ```
+
+- amed the the incrementApiLimit function to only run if not a prem user;
+  ```tsx
+  if (!isPro) {
+      await incrementApiLimit();
+  }
+  ```
+
+
+<!-- small container closed -->
+</details>
+<br/><br/>
+
 
 
 <!--  heading container closed -->
