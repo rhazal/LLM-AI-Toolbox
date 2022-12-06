@@ -8,22 +8,15 @@ import { absoluteUrl } from "@/lib/utils";
 const settingsUrl = absoluteUrl("/settings");
 
 export async function GET() {
-  console.log('🔥');
   
   try {
     const { userId } = auth();
     const user = await currentUser();
-
-    console.log('🔥');
-    console.log('🔥here is the user from clerk', user);
-    console.log('🔥here is the user from auth()', userId);
     
 
     if (!userId || !user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-
-    console.log('🔥🔥🔥');
     
     //find subscription based on current userID
     const userSubscription = await prismadb.userSubscription.findUnique({
@@ -31,8 +24,6 @@ export async function GET() {
         userId
       }
     })
-
-    console.log('🔥userSubscription',userSubscription);
     
 
     //is stripe subscription already exists - should go to billingPortal (cancel subscription)

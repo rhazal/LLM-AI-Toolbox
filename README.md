@@ -1898,6 +1898,140 @@ For all the AI TOOLS API call will need to update the code with the following
 <br/><br/>
 
 
+## 8.  Error Handeling & adding Customer-Support bot 
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+### Error handeling with react-hot-toast notifs
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+- Import the hot-toast package
+  ```shell
+  npm i react-hot-toast
+  ```
+
+-  Created a `toaster-provider.tsx`
+    ```tsx
+    "use client";
+
+    import { Toaster } from "react-hot-toast"
+
+    export const ToasterProvider = () => {
+      return <Toaster />
+    };
+    ```
+
+
+-  Added the `<ToasterProvider />` above the children in the `app\layout.tsx`
+
+-  Replace all the .catch - console.logs with toast error instead
+
+> I actually have already been doing this, however I had forgotten to create the provider and pass it into the layout.tsx
+> So all my erros have already been written using the hot-toast-format
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### Customer Support-bot with Crisp
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+#### <strong> Setting up CRISP </strong>
+
+- Created an account with [Crisp Chat](https://crisp.chat/en/)
+  - signed in and made an account
+  - saved the HTML head section - will need the data 
+  - dashboard explore and find the documentation 
+
+- Installing the sdk into the project
+    ```shell
+    npm i crisp-sdk-web
+    ```
+
+<br><br>
+
+
+#### <strong> Creating a a `crisp-chat.tsx` component </strong>
+
+```tsx
+"use client";
+
+import { useEffect } from "react";
+import { Crisp } from "crisp-sdk-web";
+
+export const CrispChat = () => {
+  useEffect(() => {
+    Crisp.configure("USE CRISP WEBSITE ID");
+  }, []);
+
+  return null;
+};
+```
+
+<br><br>
+
+
+#### <strong> Creating a a `crisp-provider.tsx` component and adding to `app/layout.tsx` </strong>
+
+
+created the `crisp-provider.tsx`
+```tsx
+"use client";
+
+import { CrispChat } from "@/components/crisp-chat";
+
+export const CrispProvider = () => {
+  return <CrispChat />
+};
+```
+
+<br><br>
+
+Add just above the `body` in the `app/layout.tsx`
+```tsx
+ <html lang="en">
+  <CrispProvider />
+  <body className={inter.className}>
+```
+<br>
+
+✅ That's it, all setup - there are some integrations such as AI or bots - for now I am not going to import anything like that 
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### SMALL HEADING
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+TEXT TEXT
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+ 
+
 ## x.  TEMPLATE HEADING
 <!-- SECTION container open -->
 <details>
@@ -1937,6 +2071,8 @@ TEXT TEXT
 </details>
 <br/><br/>
  
+
+##
 
 ##
 

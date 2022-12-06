@@ -30,7 +30,6 @@ export async function POST(req:Request) {
         }
         //Check config of Api key
         if (!configuration.apiKey) {
-            console.log("😑")
             return new NextResponse("OpenAI API Key not configured.", { status: 500 });
         }
         //Check if message has been passed

@@ -29,8 +29,6 @@ export const ProModal = () => {
   const onSubscribe = async () => {
     try {
       setLoading(true);
-
-      console.log('🔥');
       
       const response = await axios.get("/api/stripe");
 
