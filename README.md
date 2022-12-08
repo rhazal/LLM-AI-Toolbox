@@ -2013,7 +2013,136 @@ Add just above the `body` in the `app/layout.tsx`
 </details>
 <br/><br/>
 
-### SMALL HEADING
+
+
+<!--  SECTION container closed -->
+</details>
+<br/><br/>
+ 
+
+## 9.  Creating Landing Page
+<!-- SECTION container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+
+### `app\(landing)\layout.tsx`
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>The `LandingLayout` component is designed to wrap the content of the landing page and apply consistent styling, such as the background color and width limitations. It allows the landing page's content to be centered and scrollable when necessary, providing a clean and visually appealing layout.
+
+1. *LandingLayout Component*: <br> This component represents a layout wrapper for the landing page.
+
+2. *Component Props*: <br> The component takes a single prop named `children`, which is of type `React.ReactNode`. <br>This prop represents the content that will be rendered inside the layout.
+
+3. *Main Container*: <br> The component returns a `<main>` element with a custom CSS class name "h-full bg-[#111827] overflow-auto". This sets the main container's background color to a dark gray (#111827) and allows it to scroll if the content overflows.
+
+4. *Content Container*: <br> Inside the main container, there's a `<div>` element with the CSS classes "mx-auto max-w-screen-xl h-full w-full". <br>This container centers the content horizontally within the page (using `mx-auto`) and limits its maximum width to `max-w-screen-xl`. The `h-full` and `w-full` classes ensure that the container takes up the full height and width of its parent, making sure the content is contained within the viewport.
+
+5. *Rendering Children*: <br> The `children` prop is rendered inside the content container. <br>The content passed to the `LandingLayout` component will be inserted here.
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+
+### `components\landing-navbar.tsx`
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>The `LandingNavbar` component is designed to provide a clean and responsive navigation experience for the landing page. It dynamically shows the "Get Started" button based on the user's authentication status, encouraging users to take the appropriate action based on whether they are signed in or not.
+
+
+1. *LandingNavbar Component*: <br> This component represents the navigation bar for the landing page.
+
+2. *Using Next.js Features*: <br> The component imports various Next.js modules and hooks such as `Image`, `Link`, and `useAuth` from `@clerk/nextjs`.
+
+3. *Custom Font*: <br> The component imports the "Montserrat" font using `Montserrat({ weight: '600', subsets: ['latin'] })`.
+
+4. *Navigation Bar*: <br> The component returns a `<nav>` element with the CSS classes "p-4 bg-transparent flex items-center justify-between". <br>This sets the navigation bar's padding, background color as transparent, and arranges its content in a flex container with items aligned at the center and justified between.
+
+5. *Logo and Title*: <br> Inside the navigation bar, there's a link to the home page ("/") with the logo and title of the application. <br>The logo is displayed using the `Image` component and the title is styled with a custom font class and other CSS classes.
+
+6. *Get Started Button*: <br> The navigation bar includes a "Get Started" button, which is conditionally rendered based on the user's authentication status. <br>If the user is signed in (`isSignedIn` is true), the button links to the dashboard ("/dashboard"). <br>Otherwise, it links to the sign-up page ("/sign-up"). <br>The button is styled using the `Button` component with the "outline" variant and a rounded border.
+
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### `components\landing-content.tsx`
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>The `LandingContent` component is designed to showcase user testimonials in an organized and visually appealing grid layout. The testimonials are displayed in a responsive manner, ensuring they look great across various screen sizes.
+
+1. *LandingContent Component*: <br> This component represents the content section on the landing page, specifically showcasing user testimonials.
+
+2. *Testimonials Data*: <br> The component defines an array called `testimonials`, which contains objects representing individual testimonials. <br>Each testimonial object has properties like `name`, `avatar`, `title`, and `description`.
+
+3. *Content Section*: <br> The component returns a `<div>` element with the CSS classes "px-10 pb-20". <br>This sets the content section's horizontal padding and bottom padding.
+
+4. *Testimonials Header*: <br> Inside the content section, there's an `<h2>` element with the CSS classes "text-center text-4xl text-white font-extrabold mb-10". <br>This header displays the text "Testimonials" and is styled to be centered, with large text size and bold font.
+
+5. *Testimonials Grid*: <br> Below the header, there's a `<div>` element with CSS classes that define a grid layout with responsive column numbers: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4". <br>The grid will display one column on small screens, two columns on small to medium screens, three columns on medium to large screens, and four columns on large screens. <br>There is a gap of 4 units between each grid item.
+
+6. *Testimonial Cards*: <br> Inside the grid, the component maps through the `testimonials` array and creates a `Card` component for each testimonial. <br>Each `Card` displays the name, title, and description of the corresponding testimonial. <br>The `Card` component is styled with a dark background color, no border, and white text.
+
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### `components\landing-hero.tsx`
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+>The `LandingHero` component effectively showcases dynamic text using the typewriter effect, inviting users to experience the AI tools and encouraging them to sign up for free without requiring a credit card.
+
+
+1. *LandingHero Component*: <br> This component represents the hero section on the landing page, designed to grab the user's attention and encourage sign-ups.
+
+2. *Typewriter Effect*: <br> The component imports the `TypewriterComponent` from the "typewriter-effect" library. <br>This effect creates an animated typewriter-style text display.
+
+3. *Dynamic Text*: <br> Inside the hero section, there's a `<div>` element with the CSS classes "text-4xl sm:text-5xl md:text-6xl lg:text-7xl space-y-5 font-extrabold". <br>This element contains a heading with the text "The Best AI Tool for" and a nested `<div>` with the CSS classes "text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600". <br>This nested div displays the typewriter effect with dynamic AI tool names ("Chatbot.", "Photo Generation.", "Blog Writing.", "Mail Writing."). <br>The typewriter effect starts automatically and loops indefinitely.
+
+4. *Subheading*: <br> Below the dynamic text, there's a `<div>` element with the CSS classes "text-sm md:text-xl font-light text-zinc-400". <br>This element displays the subheading text "Create content using AI 10x faster."
+
+5. *Call-to-Action Button*: <br> Below the subheading, there's a `<div>` element containing a `Link` component from Next.js that points to either the dashboard page (if the user is signed in) or the sign-up page (if the user is not signed in). <br>Inside the `Link`, there's a `Button` component with the CSS class "md:text-lg p-4 md:p-6 rounded-full font-semibold" and the text "Start Generating For Free". <br>The button is styled with the premium variant, indicating a premium feature but available for free.
+
+6. *Additional Information*: <br> Below the call-to-action button, there's a `<div>` element with the CSS class "text-zinc-400 text-xs md:text-sm font-normal" that displays the text "No credit card required."
+
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### 
 <hr>
 <!-- heading container open -->
 <details>
@@ -2031,8 +2160,7 @@ TEXT TEXT
 </details>
 <br/><br/>
  
-
-## x.  TEMPLATE HEADING
+## 10. Hosting on Vercel
 <!-- SECTION container open -->
 <details>
 <summary> Click here to expand: </summary>
@@ -2070,11 +2198,8 @@ TEXT TEXT
 <!--  SECTION container closed -->
 </details>
 <br/><br/>
- 
 
-##
 
-##
 
 
 
