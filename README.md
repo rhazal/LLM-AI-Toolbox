@@ -2202,4 +2202,12 @@ TEXT TEXT
 
 
 
+hosting from github repo 
 
+adding all env variables 
+
+deploy and check if passed 
+
+Error:  Type error: '"lucide-react"' has no exported member named 'Icon'. Did you mean 'XIcon'?
+
+Solution updat to use the Xicon instead (Icon had been depricated mid project build)
