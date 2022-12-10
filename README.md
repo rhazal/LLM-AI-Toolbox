@@ -2211,3 +2211,13 @@ deploy and check if passed
 Error:  Type error: '"lucide-react"' has no exported member named 'Icon'. Did you mean 'XIcon'?
 
 Solution updat to use the Xicon instead (Icon had been depricated mid project build)
+
+
+
+Error:  PrismaClientInitializationError: Prisma has detected that this project was built on Vercel, which caches dependencies. This leads to an outdated Prisma Client because Prisma's auto-generation isn't triggered. To fix this, make sure to run the `prisma generate` command during the build process.
+
+
+Inside the package.json need to add a postinstall command
+```shell
+"postinstall": "prisma generate"
+```
