@@ -3,8 +3,8 @@
     <h1>Fullstack AI Toolbox</h1>
     <h4>(Portfolio Project)<h4>
     <h3> 
-      <a href='', target='_blank'>
-        www.LLM AI TOOLBOX.com 
+      <a href='https://ai-toolbox-devongifford.vercel.app/', target='_blank'>
+        https://ai-toolbox-devongifford.vercel.app/
       <a/>
     <h5>live demo</h5>
     </h3>
@@ -16,7 +16,7 @@
 
 <!-- Logo -->
 <p align='center'>
-    <img src="" alt="Demo" title="DemoImage" width="500" height="300">
+    <img src="public\Ai-toolbox.png" alt="Demo" title="DemoImage" width="500" height="300">
 </p>
 
 
@@ -27,6 +27,8 @@
     </a>
 </p>
 <hr> -->
+
+<br>
 
 
 <!-- -------------------------------------------------------------------------- -->
@@ -41,14 +43,25 @@
 <!-- -------------------------------------------------------------------------- -->
 <hr/>
 
-Introducing "LLM AI Toolbox: SaaS Suite," your comprehensive and user-friendly GitHub repository featuring a vast array of Language Model-based AI tools. This all-in-one platform offers seamless access to multiple LLM AI capabilities, including natural language processing, sentiment analysis, and text generation, all within a single webpage. Embrace the power of AI with our SaaS-based approach, enabling effortless integration and utilization of these cutting-edge tools for your projects and applications. Revolutionize your data processing and analysis with the versatility and convenience of this all-inclusive toolbox, empowering you to level up your AI game and gain deeper insights from textual data.
+🚀 Introducing "LLM AI Toolbox: SaaS Suite," your ultimate weapon in the AI universe! 🤖🌌 This GitHub repository is a powerhouse of Language Model-based AI tools that'll take your projects to the next level! 💯. 
+
+This all-in-one platform offers seamless access to multiple LLM AI capabilities, including;
+
+-  📝 Master natural language processing,
+-  😃 Explore sentiment analysis, and
+-  🧠 Dive into text generation.
+
+All within a single webpage. No fuss, no hassle, just pure AI wizardry at your fingertips! 🤖
+
+Embrace the power of AI with my SaaS-based approach, enabling effortless integration and utilization of these cutting-edge tools for your projects and applications. Revolutionize your data processing and analysis with the versatility and convenience of this all-inclusive toolbox, empowering you to level up your AI game and gain deeper insights from textual data.
+
+Don't miss the AI hype train! 🚂 Jump on board and embark on an extraordinary AI adventure with my powerhouse toolbox! 🚀 Embrace the future of AI and tech greatness! 💪🌟
 
 
-<br><br>
 
 
 
-#### Key Features of this project:
+### 🔑 Key Features of this project:
 <!-- -------------------------------------------------------------------------- -->
 <hr>
 
@@ -61,22 +74,30 @@ Let's dive into the key features that make this project shine! 💡
 
 <div>
     <ul>
+        <li> 💼 Proficiently structured the folder organization in Next 13 App Router, optimizing code management and maintainability.</li>
+        <li> 🖼️ Demonstrated expertise in building a robust Image Generation Tool using Open AI, enhancing visual content creation.</li>
+        <li> 🎥 Successfully developed an advanced Video Generation Tool powered by Replicate AI, delivering high-quality multimedia content.</li>
+        <li> 💬 Skillfully implemented a sophisticated Conversation Generation Tool with Open AI, enabling seamless and engaging user interactions.</li>
+        <li> 🎵 Engineered a state-of-the-art Music Generation Tool using Replicate AI, enriching the platform with personalized audio experiences.</li>
+        <li> 🌐 Optimized page loading state to ensure a smooth and responsive user experience across all devices and network conditions.</li>
+        <li> 🆓 Strategically designed and integrated a free tier with API limiting, attracting a broader user base while ensuring sustainable growth.</li>
+        <li> 🔄 Leveraged advanced techniques to handle relations between Server and Child components, ensuring real-time data synchronization and efficiency.</li>
+        <li> 🔄 Effectively utilized layout reusability to streamline development and maintain consistency throughout the application.</li>
         <li> 💳 Stripe integration: Seamlessly handle secure payment transactions for premium subscriptions.</li>
         <li> 💎 Sleek UI with Tailwind design: Enjoy a visually stunning and modern user interface.</li>
         <li> 🌟 Tailwind animations and transition effects: Enhance the user experience with smooth and captivating animations.</li>
         <li> 📱 Full responsiveness for all devices: The application adapts flawlessly to various screen sizes and devices.</li>
-        <li> 🔐 Credential authentication with Supabase: Safeguard user data and ensure secure access to the platform.</li>
-        <li> 🚀 Github authentication integration: Simplify the registration and login process using GitHub credentials.</li>
-        <li> 📁 File and image upload using Supabase storage: Store user-uploaded files and images securely in the cloud.</li>
-        <li> 📝 Client form validation and handling using react-hook-form: Provide a seamless and error-free form submission experience for users.</li>
+        <li> 🔐 Credential authentication with Clerk: Safeguard user data and ensure secure access to the platform.</li>
+        <li> 🚀 Github, Google and email authentication integration: Simplify the registration and login process using GitHub/Google credentials.</li>
         <li> 🚦 Server error handling with react-toast: Display meaningful error messages and ensure smooth error handling.</li>
-        <li> ▶️ Play song audio: Enjoy an immersive music experience with the ability to play songs directly from the app.</li>
-        <li> ❤️ Favorites system: Users can mark their favorite songs and easily access them for future listening.</li>
         <li> 💰 Stripe recurring payment integration: Enable seamless subscription billing and automate payment handling.</li>
         <li> 🔄 Using POST, GET, and DELETE routes in route handlers (app/api): Implement a robust backend API to handle data operations.</li>
         <li> 🌐 Fetch data with server React components: Optimize performance by directly accessing the database without relying on API calls.</li>
         <li> ⚡️ Handling relations between Server and Child components in a real-time environment: Ensure consistent data synchronization and real-time updates.</li>
         <li> 🛑 Cancelling Stripe subscriptions: Allow users to easily cancel their subscription plans.</li>
+
+
+
     </ul> 
 </div>
 
@@ -85,16 +106,97 @@ Let's dive into the key features that make this project shine! 💡
 <br/>
 
 
-#### Important points to note:
+### 📚 Libraries used in this project:
 <!-- -------------------------------------------------------------------------- -->
 <hr>
 
 <!-- Small container -->
 <details>
-<summary> Click here to see all the features: </summary>
+<summary> Click here to see all the packages: </summary>
 <br/>
 
-- This project is for educational purposes only and not affiliated with ...
+#### Dependencies:
+
+1. **@clerk/nextjs**: Integrates the Clerk authentication and user management system with Next.js applications.
+
+2. **@hookform/resolvers**: Provides resolver functions for React Hook Form, enabling advanced form validation.
+
+3. **@prisma/client**: Prisma's database client, used for seamless database access and query generation.
+
+4. **@radix-ui/react-avatar**: Offers a customizable avatar component with built-in styles for React applications.
+
+5. **@radix-ui/react-dialog**: Provides a flexible and accessible dialog component to create modal dialogs.
+
+6. **@radix-ui/react-label**: A collection of label components to improve accessibility and interaction in forms.
+
+7. **@radix-ui/react-progress**: Renders a progress bar with customizable styles and animation options.
+
+8. **@radix-ui/react-select**: A powerful and accessible select dropdown component with various features.
+
+9. **@radix-ui/react-slot**: Enables slot-based content composition for components in a React application.
+
+10. **@types/node**, **@types/react**, **@types/react-dom**: TypeScript declaration files for Node.js and React.
+
+11. **autoprefixer**: A PostCSS plugin that automatically adds vendor prefixes to CSS styles.
+
+12. **axios**: A widely-used HTTP client for making asynchronous requests to APIs.
+
+13. **class-variance-authority**: A library for class variance analysis and authority checks.
+
+14. **clsx**: A utility to conditionally join CSS class names together.
+
+15. **crisp-sdk-web**: Crisp chat SDK for web applications, enabling live chat support.
+
+16. **eslint**: A pluggable linting utility to enforce coding standards and detect errors in JavaScript/TypeScript code.
+
+17. **eslint-config-next**: ESLint configuration for Next.js projects.
+
+18. **framer-motion**: A motion library for creating smooth animations and transitions in React applications.
+
+19. **lucide-react**: A collection of crisp and clear SVG icons as React components.
+
+20. **next**: A popular React framework for building server-rendered applications.
+
+21. **openai**: A Python library for working with the OpenAI API.
+
+22. **postcss**: A tool for transforming CSS styles using JavaScript plugins.
+
+23. **react**: A JavaScript library for building user interfaces.
+
+24. **react-dom**: The DOM-specific entry point for React applications.
+
+25. **react-hook-form**: A library for flexible and efficient form validation and handling.
+
+26. **react-hot-toast**: A minimalistic and customizable toast library for React.
+
+27. **react-icons**: A library containing popular icon packs as React components.
+
+28. **react-markdown**: Renders Markdown content as React components, useful for displaying formatted text.
+
+29. **react-parallax-tilt**: Enables the creation of parallax tilt effects for React components.
+
+30. **replicate**: A package for replicating data structures with modifications.
+
+31. **stripe**: Stripe SDK for handling payment processing and transactions.
+
+32. **tailwind-merge**: A utility for merging tailwind classes together.
+
+33. **tailwindcss**: A highly customizable CSS framework for rapid UI development.
+
+34. **tailwindcss-animate**: Tailwind CSS plugin for adding animation utilities.
+
+35. **typescript**: A typed superset of JavaScript that enhances code quality and tooling support.
+
+36. **typewriter-effect**: Creates a typewriter-like effect for text rendering in React applications.
+
+37. **zod**: A TypeScript-first schema validation library for building robust data structures.
+
+38. **zustand**: A state management library based on hooks, making it easy to manage global application state.
+
+#### Dev Dependencies:
+
+1. **prisma**: Prisma CLI for database schema management and migrations.
+
 
 
 <!-- CLOSING DIV -->
@@ -2167,29 +2269,97 @@ TEXT TEXT
 <br>
 
 
-### Small Heading
+### Preparing to build and host 
 <hr>
 <!-- heading container open -->
 <details>
 <summary> Click here to expand: </summary>
 <br>
 
-TEXT TEXT
+Pushing the latest updates to git
+
+Signing into vercel account & creating new project
+
+Hosting from github repo - main branch 
+
+Adding all env variables - will have to update webhooks/public url in a minute
+
+Deploy and check if passed - encountering some errors;
 
 <!--  heading container closed -->
 </details>
 <br/><br/>
 
 
-### SMALL HEADING
+### Fixing deployment/build errros
 <hr>
 <!-- heading container open -->
 <details>
 <summary> Click here to expand: </summary>
 <br>
 
-TEXT TEXT
+#### <strong>Error: </strong>
 
+>Type error: '"lucide-react"' has no exported member named 'Icon'. Did you mean 'XIcon'?
+
+<br>
+
+<strong>Solution: </strong>
+
+Updat to use the Xicon instead (Icon had been depricated mid project build)
+
+```tsx
+//updated
+import { XIcon } from "lucide-react";
+
+interface HeadingProps {
+  //updated
+  icon: typeof XIcon;
+}
+```
+<br><br>
+
+#### <strong>Error: </strong>
+
+>PrismaClientInitializationError: Prisma has detected that this project was built on Vercel, which caches dependencies. This leads to an outdated Prisma Client because Prisma's auto-generation isn't triggered. To fix this, make sure to run the `prisma generate` command during the build process.
+
+<br>
+
+<strong>Solution: </strong>
+
+<br>
+Inside the package.json need to add a postinstall command
+```shell
+"postinstall": "prisma generate"
+```
+
+
+
+<!--  heading container closed -->
+</details>
+<br/><br/>
+
+### Adding hosted stripe endpoint and QA testing
+<hr>
+<!-- heading container open -->
+<details>
+<summary> Click here to expand: </summary>
+<br>
+
+#### Adding stripe webhook listener to the hosted endpoint
+ - getting the siging secret 
+ - adding secret to the env variables in vercel:
+    `STRIPE_WEBHOOK_SECRETSTRIPE_WEBHOOK_SECRET`
+
+<br>
+
+#### Adding hte webhook url: 
+- on the same page we got the webhook secret (webhook/hosted-endpoint) - copy the url 
+- add it to the env variables in vercel:  
+    `NEXT_PUBLIC_APP_URL`
+
+#### QA Testing functionality:
+All checks passed the app is now live and working  😁
 
 <!--  heading container closed -->
 </details>
@@ -2200,24 +2370,3 @@ TEXT TEXT
 <br/><br/>
 
 
-
-
-hosting from github repo 
-
-adding all env variables 
-
-deploy and check if passed 
-
-Error:  Type error: '"lucide-react"' has no exported member named 'Icon'. Did you mean 'XIcon'?
-
-Solution updat to use the Xicon instead (Icon had been depricated mid project build)
-
-
-
-Error:  PrismaClientInitializationError: Prisma has detected that this project was built on Vercel, which caches dependencies. This leads to an outdated Prisma Client because Prisma's auto-generation isn't triggered. To fix this, make sure to run the `prisma generate` command during the build process.
-
-
-Inside the package.json need to add a postinstall command
-```shell
-"postinstall": "prisma generate"
-```
